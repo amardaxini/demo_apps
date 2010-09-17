@@ -1,0 +1,53 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Name:</b> <%= @project.name %>
+ </p>
+ <br />
+ 
+<p> 
+  <b>Start date:</b> <%= @project.start_date %>
+  <b>End date:</b> <%= @project.end_date %>
+  <b>Manager:</b> <%= @project.manager.name %>
+</p>
+
+<br />
+<p>
+  <b>Description:</b> <%= @project.description %>
+</p>
+<div class="listing">
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>due date</th>
+        <th>Owner</th>
+        <th width="30"></th>
+       </tr>
+    </thead>
+    <tbody>
+      <% @milestones.each do |milestone| %>
+
+        <tr>
+          <td><%= link_to  milestone.name,project_milestone_path(@project,milestone) %></td>
+          <td><%= milestone.description %></td>
+          <td><%= milestone.due_date %></td>
+          <td><%= milestone.owner.name %></td>
+          <td><%= link_to image_tag('edit_10.png'), edit_project_milestone_path(@project,milestone) %>
+       <%= link_to image_tag('delete_10.png'), project_milestone_path(@project,milestone), :confirm => 'Are you sure?', :method => :delete %></td>
+        </tr>
+      <% end %>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="5"><%= link_to "Add Milestone",new_project_milestone_path(@project) %></td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+
+
+<%= link_to 'Edit Project', edit_project_path(@project) %> |
+<%= link_to 'Back', projects_path %>

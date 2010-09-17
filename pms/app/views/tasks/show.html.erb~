@@ -1,0 +1,36 @@
+<h2>Project :- <%= @task.project.name rescue "" %> </h2>
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Name:</b>
+  <%= @task.name %>
+</p>
+
+<p>
+  <b>Description:</b>
+  <%= @task.description %>
+</p>
+
+<p>
+  <b>Due date:</b>
+  <%= @task.due_date %>
+</p>
+
+<p>
+  <b>Owner:</b>
+  <%= @task.owner.name rescue"" %>
+</p>
+
+<p>
+  <b>Milestone:</b>
+  <%= @task.milestone_id %>
+</p>
+
+<p>
+  <b>Status:</b>
+  <%= @task.status %>
+</p>
+
+
+<%= link_to 'Edit', edit_milestone_task_path(@milestone,@task) %> |
+<%= link_to 'Back', project_milestone_path(@project,@milestone) %>

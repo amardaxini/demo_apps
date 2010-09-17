@@ -1,0 +1,17 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  name: MyString
+  description: MyText
+  due_date: 2010-09-13 13:03:39
+  owner_id: 1
+  milestone_id: 1
+  status: MyString
+
+two:
+  name: MyString
+  description: MyText
+  due_date: 2010-09-13 13:03:39
+  owner_id: 1
+  milestone_id: 1
+  status: MyString

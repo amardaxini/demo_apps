@@ -1,0 +1,56 @@
+<h2> Project :- <%= @milestone.project.name rescue "Other"%></h2>
+<br />
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Name:</b>
+  <%= @milestone.name %>
+</p>
+
+<p>
+  <b>Description:</b>
+  <%= @milestone.description %>
+</p>
+
+<p>
+  <b>Due date:</b> <%= @milestone.due_date %>
+  <b>Owner:</b> <%= @milestone.owner.name rescue "" %>
+</p>
+
+<div class="listing">
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>due date</th>
+        <th>Owner</th>
+        <th>Status</th>
+        <th width="30"></th>
+       </tr>
+    </thead>
+    <tbody>
+      <% @tasks.each do |task| %>
+
+        <tr>
+          <td><%= link_to  task.name,milestone_task_path(@milestone,task) %></td>
+          <td><%= task.description %></td>
+          <td><%= task.due_date %></td>
+          <td><%= task.owner.name rescue "" %></td>
+          <td><%= link_to image_tag('edit_10.png'), edit_milestone_task_path(@milestone,task) %>
+       <%= link_to image_tag('delete_10.png'),milestone_task_path(@milestone,task), :confirm => 'Are you sure?', :method => :delete %></td>
+        </tr>
+      <% end %>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="6"><%= link_to "Add Task",new_milestone_task_path(@milestone) %></td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+
+
+<%= link_to 'Edit', edit_project_milestone_path(@project,@milestone) %> |
+<%= link_to 'Back', project_path(@project) %>

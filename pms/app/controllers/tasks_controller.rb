@@ -1,0 +1,163 @@
+class TasksController < ApplicationController
+  # GET /tasks
+  # GET /tasks.xml
+   skip_before_filter :authenticate_user!,:only=>[:create_task_using_mail]
+   before_filter :load_milestone,:except=>[:index,:create_task_using_mail]
+   skip_before_filter :verify_authenticity_token,:only=>[:create_task_using_mail]
+  def index
+    @projects = Project.all
+    if params[:project_id].blank?
+      @tasks = Task.all
+      @project_id = ""
+    else
+      @project = Project.find(params[:project_id])
+      @project_id = @project.id
+      @tasks =  @project.tasks
+    end
+
+    respond_to do |format|
+      format.html # index.html.erb
+      format.xml  { render :xml => @tasks }
+    end
+  end
+
+  # GET /tasks/1
+  # GET /tasks/1.xml
+  def show
+    @task = @milestone.tasks.find(params[:id])
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.xml  { render :xml => @task }
+    end
+  end
+
+  # GET /tasks/new
+  # GET /tasks/new.xml
+  def new
+    @task = @milestone.tasks.new
+
+    respond_to do |format|
+      format.html # new.html.erb
+      format.xml  { render :xml => @task }
+    end
+  end
+
+  # GET /tasks/1/edit
+  def edit
+    @task = @milestone.tasks.find(params[:id])
+  end
+
+  # POST /tasks
+  # POST /tasks.xml
+  def create
+    @task = @milestone.tasks.new(params[:task])
+
+    respond_to do |format|
+      if @task.save
+        format.html { redirect_to(milestone_task_path(@milestone,@task), :notice => 'Task was successfully created.') }
+        format.xml  { render :xml => @task, :status => :created, :location => @task }
+      else
+        format.html { render :action => "new" }
+        format.xml  { render :xml => @task.errors, :status => :unprocessable_entity }
+      end
+    end
+  end
+
+  # PUT /tasks/1
+  # PUT /tasks/1.xml
+  def update
+    @task = @milestone.tasks.find(params[:id])
+
+    respond_to do |format|
+      if @task.update_attributes(params[:task])
+        format.html { redirect_to(milestone_task_path(@milestone,@task), :notice => 'Task was successfully updated.') }
+        format.xml  { head :ok }
+      else
+        format.html { render :action => "edit" }
+        format.xml  { render :xml => @task.errors, :status => :unprocessable_entity }
+      end
+    end
+  end
+
+  # DELETE /tasks/1
+  # DELETE /tasks/1.xml
+  def destroy
+    @task = @milestone.tasks.find(params[:id])
+    @task.destroy
+
+    respond_to do |format|
+      format.html { redirect_to(project_milestone_path(@project,@milestone)) }
+      format.xml  { head :ok }
+    end
+  end
+  
+  def create_task_using_mail
+    message = Mail.new(params[:message])
+    puts  params
+    puts "\n"
+    user_email = User.all.collect{|u| u.email}.flatten.uniq
+    if user_email.include?(message.from.to_s)
+      puts message.from
+       owner_id = User.find_by_email(message.from).id
+       owner_id = User.last.id
+      if message.subject == "Create Task"
+        body = ""
+        if message.multipart?
+          attachments = []
+          message.parts.each do |part|
+            if part.content_type =~ /^text\/plain/i
+              body << part.body.decoded
+            end
+          end
+        else
+          body = message.body.decoded
+        end  
+
+       if body.is_a?(Array)
+        body_part = body_part.join("\n")
+       else
+        body_part = body
+       end 
+       #PARSE MAIL BODY
+       milestone_name = "Default Milestone"
+       description = "Test Task"
+       name = "Test Task"
+       due_date = Date.today.to_s
+       message_body = body_part.split("\n")
+       message_body = message_body.join(" ")
+       message_body = message_body.split("[")
+       message_body = message_body.join("\n[")
+       message_body = message_body.split("\n")
+       reg_exp=%r{(.+)}
+       if message_body.is_a?(Array)
+        message_body.compact.each do |part|
+          line = reg_exp.match(part)[0] unless reg_exp.match(part).nil?
+          if line =~ /\[name\]/
+            name = line.split("=").last.strip unless line.split("=").last.nil?
+          elsif line =~ /\[description\]/
+            description = line.split("=").last.strip unless line.split("=").last.nil?
+          elsif line =~ /\[milestone\]/
+            milestone_name = line.split("=").last.strip unless line.split("=").last.nil?
+          elsif line = ~ /\[due_date\]/
+            due_date = line.split("=").last.strip unless line.split("=").last.nil?
+          end
+         end  
+       end
+       milestone = Milestone.find_by_name(milestone_name)
+       if milestone.blank?
+         milestone_name = "Default Milestone"
+         milestone = Milestone.find_by_name(milestone_name)
+       end
+         milestone.tasks.create!(:name=>name,:description=>description,:owner_id=>owner_id,:due_date=>due_date) 
+      end
+    end 
+    render :text => 'success', :status => 200 # a status of 404 would reject the mail
+
+  end
+  private
+  def load_milestone
+    @milestone = Milestone.find(params[:milestone_id])
+    @project = @milestone.project
+  end
+end
